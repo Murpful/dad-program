@@ -58,6 +58,10 @@ if uploaded_file is not None:
 
     # Iterate through each event to gather additional information
     for index, row in data.iterrows():
+        if row['Schedule Event'] == 'Requested Off' or row['Schedule Event'] == 'Day Off':
+            data.at[index, 'Description'] = "Non-teaching event"
+            continue
+        
         st.write(f"Event: {row['Schedule Event']}, Date: {row['Date']}")
         
         is_teaching_event = st.radio(f"Is this a teaching event?", options=['No', 'Yes'], index=0, key=f"is_teaching_event_{index}")
