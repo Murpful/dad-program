@@ -70,9 +70,13 @@ if uploaded_file is not None:
             location = st.text_input("Location", value="", key=f"location_{index}")
 
             # Update the description with the entered values
-            data.at[index, 'Description'] = f"Instructor: {instructor_name}, Seat Support: {seat_support_name}, Students: {students}, Location: {location}"
+            description = f"Instructor: {instructor_name}\nSeat Support: {seat_support_name}\nStudents: {students}\nLocation: {location}"
+            data.at[index, 'Description'] = description
         else:
             data.at[index, 'Description'] = "Non-teaching event"
+        
+        # Add a horizontal line between entries
+        st.markdown("<hr style='border: 2px solid black;'>", unsafe_allow_html=True)
 
     # Select relevant columns for display
     display_data = data[['Schedule Event', 'Date', 'Time', 'Description']]
