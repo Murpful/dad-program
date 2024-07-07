@@ -13,7 +13,8 @@ def create_icalendar(df):
         event.add('summary', row['Schedule Event'])
         event.add('dtstart', row['Start'])
         event.add('dtend', row['End'])
-        event.add('location', row['Location'])
+        if row['Location']:  # Only add location if it's a teaching event
+            event.add('location', row['Location'])
         event.add('description', row['Description'])
         cal.add_component(event)
     
@@ -50,11 +51,13 @@ if uploaded_file is not None:
     
     # Initialize empty columns for additional information
     data['Description'] = ""
+    data['Location'] = ""
 
     # Variables to keep track of default values for teaching events
     default_instructor = "Stephen LePrell"
     default_seat_support = ""
     default_students = ""
+    default_location = ""
 
     # Iterate through each event to gather additional information
     for index, row in data.iterrows():
@@ -70,14 +73,17 @@ if uploaded_file is not None:
             instructor_name = st.text_input("Instructor Name", value=default_instructor, key=f"instructor_name_{index}")
             seat_support_name = st.text_input("Seat Support Name", value=default_seat_support, key=f"seat_support_name_{index}")
             students = st.text_area("Students (comma separated)", value=default_students, key=f"students_{index}")
+            location = st.text_input("Location", value=default_location, key=f"location_{index}")
 
             # Update the description with the entered values
             data.at[index, 'Description'] = f"Instructor: {instructor_name}, Seat Support: {seat_support_name}, Students: {students}"
+            data.at[index, 'Location'] = location
             
             # Update default values for the next teaching event
             default_instructor = instructor_name
             default_seat_support = seat_support_name
             default_students = students
+            default_location = location
         else:
             data.at[index, 'Description'] = "Non-teaching event"
 
