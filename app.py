@@ -21,6 +21,12 @@ def create_icalendar(df):
 # Streamlit app
 st.title('Event Schedule Upload and iCalendar Export')
 
+# Initialize session state if not already initialized
+if 'data' not in st.session_state:
+    st.session_state['data'] = None
+if 'additional_info' not in st.session_state:
+    st.session_state['additional_info'] = {}
+
 # File upload
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
@@ -50,6 +56,13 @@ if uploaded_file is not None:
     # Initialize empty columns for additional information
     data['Description'] = ""
 
+    # Save data to session state
+    st.session_state['data'] = data
+
+# Load data from session state
+if st.session_state['data'] is not None:
+    data = st.session_state['data']
+    
     # Default instructor name
     default_instructor = "Stephen LePrell"
 
@@ -61,13 +74,27 @@ if uploaded_file is not None:
         
         st.write(f"Event: {row['Schedule Event']}, Date: {row['Date']}")
         
-        is_teaching_event = st.radio(f"Is this a teaching event?", options=['No', 'Yes'], index=0, key=f"is_teaching_event_{index}")
-        
+        # Initialize session state variables before creating widgets
+        if f'is_teaching_event_{index}' not in st.session_state:
+            st.session_state[f'is_teaching_event_{index}'] = 'No'
+        is_teaching_event = st.radio(f"Is this a teaching event?", options=['No', 'Yes'], index=0 if st.session_state[f'is_teaching_event_{index}'] == 'No' else 1, key=f"is_teaching_event_{index}")
+
         if is_teaching_event == 'Yes':
-            instructor_name = st.text_input("Instructor Name", value=default_instructor, key=f"instructor_name_{index}")
-            seat_support_name = st.text_input("Seat Support Name", value="", key=f"seat_support_name_{index}")
-            students = st.text_area("Students (comma separated)", value="", key=f"students_{index}")
-            location = st.text_input("Location", value="", key=f"location_{index}")
+            if f'instructor_name_{index}' not in st.session_state:
+                st.session_state[f'instructor_name_{index}'] = default_instructor
+            instructor_name = st.text_input("Instructor Name", value=st.session_state[f'instructor_name_{index}'], key=f"instructor_name_{index}")
+
+            if f'seat_support_name_{index}' not in st.session_state:
+                st.session_state[f'seat_support_name_{index}'] = ""
+            seat_support_name = st.text_input("Seat Support Name", value=st.session_state[f'seat_support_name_{index}'], key=f"seat_support_name_{index}")
+
+            if f'students_{index}' not in st.session_state:
+                st.session_state[f'students_{index}'] = ""
+            students = st.text_area("Students (comma separated)", value=st.session_state[f'students_{index}'], key=f"students_{index}")
+
+            if f'location_{index}' not in st.session_state:
+                st.session_state[f'location_{index}'] = ""
+            location = st.text_input("Location", value=st.session_state[f'location_{index}'], key=f"location_{index}")
 
             # Update the description with the entered values
             description = f"Instructor: {instructor_name}\nSeat Support: {seat_support_name}\nStudents: {students}\nLocation: {location}"
@@ -77,6 +104,9 @@ if uploaded_file is not None:
         
         # Add a horizontal line between entries
         st.markdown("<hr style='border: 2px solid black;'>", unsafe_allow_html=True)
+
+    # Save updated data back to session state
+    st.session_state['data'] = data
 
     # Select relevant columns for display
     display_data = data[['Schedule Event', 'Date', 'Time', 'Description']]
